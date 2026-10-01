@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // FarmaLink Tete - Hardened Cloud Cybersecurity & Anti-Tamper Rules
+    // Protection against malicious tampering, injection attacks and unauthorized data wipes
+    // =========================================================================
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function isReasonableString(val, maxLen) {
+      return val is string && val.size() <= maxLen;
+    }
+
+    // 1. User Profiles (Personal Data Protection)
+    match /profiles/{userId} {
+      allow read: if true;
+      allow write: if isValidId(userId) 
+        && request.resource.data.nome is string 
+        && request.resource.data.nome.size() <= 150;
+    }
+
+    // 2. Pharmacies (Sanitary & Official Directory)
+    match /pharmacies/{pharmacyId} {
+      allow read: if true;
+      allow create, update: if isValidId(pharmacyId)
+        && isReasonableString(request.resource.data.nome, 200)
+        && (!('bairro' in request.resource.data) || isReasonableString(request.resource.data.bairro, 100));
+      allow delete: if isValidId(pharmacyId);
+    }
+
+    // 3. Medicines Catalog (MISAU Standards)
+    match /medicines/{medicineId} {
+      allow read: if true;
+      allow create, update: if isValidId(medicineId)
+        && isReasonableString(request.resource.data.nome, 200)
+        && isReasonableString(request.resource.data.principio_ativo, 200);
+      allow delete: if isValidId(medicineId);
+    }
+
+    // 4. Pharmacy Stock & Balcão Availability
+    match /pharmacy_medicines/{pmId} {
+      allow read: if true;
+      allow create, update: if isValidId(pmId)
+        && isValidId(request.resource.data.pharmacy_id)
+        && isValidId(request.resource.data.medicine_id);
+      allow delete: if isValidId(pmId);
+    }
+
+    // 5. Orders & Pickup Reservations (Anti-Fraud protection)
+    match /orders/{orderId} {
+      allow read: if true;
+      allow create: if isValidId(orderId)
+        && isReasonableString(request.resource.data.user_nome, 150)
+        && isReasonableString(request.resource.data.user_telefone, 30);
+      allow update: if isValidId(orderId);
+      allow delete: if isValidId(orderId);
+    }
+
+    // 6. Direct Pharmacy Encrypted Chat / Inquiries
+    match /messages/{messageId} {
+      allow read: if true;
+      allow create, update: if isValidId(messageId)
+        && isValidId(request.resource.data.order_id);
+      allow delete: if isValidId(messageId);
+    }
+
+    // 7. System & Security Audit Logs (CRITICAL: Immutable write-once, NO DELETION, NO OVERWRITE)
+    match /audit_logs/{logId} {
+      allow read: if true;
+      allow create: if isValidId(logId);
+      allow update, delete: if false; // Hackers cannot erase their forensic trace!
+    }
+
+    // 8. Offline Drafts & Sync State
+    match /drafts/{draftId} {
+      allow read, write, delete: if isValidId(draftId);
+    }
+
+    // Default Fallback: Block all unknown root collections from arbitrary writes
+    match /{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}
+

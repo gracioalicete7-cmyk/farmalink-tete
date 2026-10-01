@@ -1,0 +1,150 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with role-based access control (utente, director, admin, superadmin)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "user_id": { "type": "string", "maxLength": 128 },
+        "nome": { "type": "string", "maxLength": 150 },
+        "telefone": { "type": "string", "maxLength": 30 },
+        "email": { "type": "string", "format": "email", "maxLength": 150 },
+        "role": { "type": "string", "enum": ["user", "director", "admin", "superadmin"] },
+        "numero_profissional": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "enum": ["active", "pending", "suspended"] },
+        "created_at": { "type": "string" },
+        "updated_at": { "type": "string" }
+      },
+      "required": ["id", "nome", "email", "role", "status"]
+    },
+    "Pharmacy": {
+      "title": "Pharmacy",
+      "description": "Licensed physical pharmacy in Tete province with DPS homologation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "nome": { "type": "string", "maxLength": 150 },
+        "alvara_numero": { "type": "string", "maxLength": 50 },
+        "diretor_tecnico_id": { "type": "string", "maxLength": 128 },
+        "diretor_nome": { "type": "string", "maxLength": 150 },
+        "provincia": { "type": "string", "maxLength": 50 },
+        "cidade": { "type": "string", "maxLength": 50 },
+        "bairro": { "type": "string", "maxLength": 100 },
+        "endereco_completo": { "type": "string", "maxLength": 250 },
+        "telefone_principal": { "type": "string", "maxLength": 30 },
+        "whatsapp": { "type": "string", "maxLength": 30 },
+        "email": { "type": "string", "format": "email", "maxLength": 150 },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "horario_abertura": { "type": "string", "maxLength": 10 },
+        "horario_fecho": { "type": "string", "maxLength": 10 },
+        "plantao_24h": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["approved", "pending", "rejected", "suspended"] },
+        "created_at": { "type": "string" },
+        "updated_at": { "type": "string" }
+      },
+      "required": ["id", "nome", "alvara_numero", "bairro", "status"]
+    },
+    "Medicine": {
+      "title": "Medicine",
+      "description": "Pharmaceutical product registered in national formulary",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "nome": { "type": "string", "maxLength": 150 },
+        "dci": { "type": "string", "maxLength": 150 },
+        "dosagem": { "type": "string", "maxLength": 50 },
+        "forma_farmaceutica": { "type": "string", "maxLength": 50 },
+        "categoria": { "type": "string", "maxLength": 100 },
+        "precisa_receita": { "type": "boolean" },
+        "preco_medio_mzn": { "type": "number" },
+        "descricao": { "type": "string", "maxLength": 1000 },
+        "status": { "type": "string", "enum": ["active", "discontinued"] }
+      },
+      "required": ["id", "nome", "dci", "dosagem", "precisa_receita"]
+    },
+    "PharmacyMedicine": {
+      "title": "PharmacyMedicine",
+      "description": "Stock record linking a pharmacy to a medicine with live inventory",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "farmacia_id": { "type": "string", "maxLength": 128 },
+        "medicamento_id": { "type": "string", "maxLength": 128 },
+        "quantidade_stock": { "type": "number" },
+        "preco_venda_mzn": { "type": "number" },
+        "disponibilidade": { "type": "string", "enum": ["disponivel", "esgotado", "por_encomenda"] },
+        "lote": { "type": "string", "maxLength": 50 },
+        "validade": { "type": "string", "maxLength": 30 },
+        "updated_at": { "type": "string" }
+      },
+      "required": ["id", "farmacia_id", "medicamento_id", "quantidade_stock", "preco_venda_mzn"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Prescription reservation order with digital pickup security token",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "utente_id": { "type": "string", "maxLength": 128 },
+        "utente_nome": { "type": "string", "maxLength": 150 },
+        "utente_telefone": { "type": "string", "maxLength": 30 },
+        "farmacia_id": { "type": "string", "maxLength": 128 },
+        "farmacia_nome": { "type": "string", "maxLength": 150 },
+        "medicamento_id": { "type": "string", "maxLength": 128 },
+        "medicamento_nome": { "type": "string", "maxLength": 150 },
+        "quantidade": { "type": "number" },
+        "total_mzn": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "ready", "completed", "cancelled"] },
+        "codigo_levantamento": { "type": "string", "maxLength": 30 },
+        "security_signature": { "type": "string", "maxLength": 100 },
+        "created_at": { "type": "string" },
+        "expires_at": { "type": "string" }
+      },
+      "required": ["id", "utente_id", "farmacia_id", "medicamento_id", "status", "codigo_levantamento"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Immutable security and audit trail for health compliance and anti-tampering",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "user_id": { "type": "string", "maxLength": 128 },
+        "action": { "type": "string", "maxLength": 100 },
+        "entity": { "type": "string", "maxLength": 100 },
+        "details": { "type": "string", "maxLength": 1000 },
+        "ip_address": { "type": "string", "maxLength": 50 },
+        "severity": { "type": "string", "enum": ["info", "warning", "critical"] },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "action", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/profiles/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profiles and RBAC credentials"
+    },
+    "/pharmacies/{pharmacyId}": {
+      "schema": { "$ref": "#/entities/Pharmacy" },
+      "description": "Licensed physical pharmacies in Tete"
+    },
+    "/medicines/{medicineId}": {
+      "schema": { "$ref": "#/entities/Medicine" },
+      "description": "National pharmaceutical drug formulary and catalog"
+    },
+    "/pharmacy_medicines/{pmId}": {
+      "schema": { "$ref": "#/entities/PharmacyMedicine" },
+      "description": "Real-time stock levels and pricing per pharmacy"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Reservation orders with anti-tamper security signatures"
+    },
+    "/audit_logs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "Immutable security logs and audit events"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "FarmaLink Tete",
+  "description": "Plataforma digital para consulta e localização de medicamentos e farmácias na Província de Tete, Moçambique.",
+  "requestFramePermissions": ["geolocation", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
